@@ -58,3 +58,8 @@
 {"message":"Unauthorized request to path: /","level":"error"}
 {"message":"Unauthorized request to path: /bookmarks","level":"error"}
 {"message":"Unauthorized request to path: /bookmarks/ckcz8u08y000304vtm8tym5xl","level":"error"}
+{"message":"Unauthorized request to path: /","level":"error"}
+{"message":"Unauthorized request to path: /bookmarks","level":"error"}
+{"message":"Unauthorized request to path: /","level":"error"}
+{"message":"Unauthorized request to path: /","level":"error"}
+{"message":"Unauthorized request to path: /bookmarks/ckcz8u08y000304vtm8tym5xl","level":"error"}
