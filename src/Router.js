@@ -16,13 +16,13 @@ const serializeBookmark = (bookmark) => ({
 
 bookmarksRouter
   .route("/bookmarks")
-  .get((req, res, next) => {
+  .get((req, res) => {
     const knexInstance = req.app.get("db");
     BookmarksService.getAllArticles(knexInstance)
       .then((bookmarks) => {
         res.json(bookmarks.map(serializeBookmark));
       })
-      .catch(next);
+      .catch(() => {});
   })
 
   .post(bodyParser, (req, res) => {
