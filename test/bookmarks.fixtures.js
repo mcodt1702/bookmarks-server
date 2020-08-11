@@ -1,47 +1,46 @@
 function makeBookmarksArray() {
-  return;
-  [
+  return [
     {
-      id: "cjozyzcil0000lxygs3gyg2mr",
+      id: "1",
       title: "Thinkful",
       url: "https://www.thinkful.com",
-      description: "Think outside the classroom",
       rating: 5,
+      description: "Think outside the classroom",
     },
     {
-      id: "cjozyzeqh0001lxygb8mhnvhz",
+      id: "2",
       title: "Google",
       url: "https://www.google.com",
-      description: "Where we find everything else",
       rating: 4,
+      description: "Where we find everything else",
     },
     {
-      id: "cjkzyzeqh0001lxygb8mhqvh3",
+      id: "3",
       title: "MDN",
       url: "https://developer.mozilla.org",
-      description: "The only place to find web documentation",
       rating: 5,
+      description: "The only place to find web documentation",
     },
     {
-      id: "ckcy2f7kz000104vtos63wrt2",
+      id: "4",
       title: "Redfin",
       url: "https://www.redfin.com/",
-      description: "Real estate brokerage",
       rating: 4,
+      description: "Real estate brokerage",
     },
     {
-      id: "ckcyr5iyt000204vtxzb1a3te",
+      id: "5",
       title: "Booking Memphis",
       url: "http://www.bookingmemphis.libsyn.com",
-      description: "Best Podcast Ever",
       rating: 1,
+      description: "Best Podcast Ever",
     },
     {
-      id: "ckcz8u08y000304vtm8tym5xl",
+      id: "6",
       title: "Test",
       url: "http://www.test.com",
-      description: "test site",
       rating: 3,
+      description: "test site",
     },
   ];
 }

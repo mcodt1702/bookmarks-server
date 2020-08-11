@@ -6,23 +6,13 @@ const bookmarksRouter = express.Router();
 const bodyParser = express.json();
 const BookmarksService = require("./bookmarks-service");
 
-const serializeBookmark = (bookmark) => ({
-  id: bookmark.id,
-  title: bookmark.title,
-  url: bookmark.url,
-  description: bookmark.description,
-  rating: Number(bookmark.rating),
-});
-
 bookmarksRouter
   .route("/bookmarks")
   .get((req, res) => {
     const knexInstance = req.app.get("db");
-    BookmarksService.getAllArticles(knexInstance)
-      .then((bookmarks) => {
-        res.json(bookmarks.map(serializeBookmark));
-      })
-      .catch(() => {});
+
+    BookmarksService.getAllArticles(knexInstance);
+    res.json(bookmarks).catch(() => {});
   })
 
   .post(bodyParser, (req, res) => {

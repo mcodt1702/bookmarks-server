@@ -1,12 +1,12 @@
 const knex = require("knex");
-const BookmarksService = require("../src/bookmarks-service");
+
 const { makeBookmarksArray } = require("./bookmarks.fixtures");
 const supertest = require("supertest");
 const app = require("../src/app");
 const { destroy } = require("../src/logger");
 
 let db;
-let data = makeBookmarksArray();
+const data = makeBookmarksArray();
 
 before(() => {
   db = knex({
@@ -16,9 +16,10 @@ before(() => {
   app.set("db", db);
 });
 
-before(() => db("bookmarks").truncate());
-afterEach(() => db("bookmarks").truncate());
-after(() => db.destroy());
+before("clean the table", () => db("bookmarks").truncate());
+
+after("disconnect from db", () => db.destroy());
+afterEach("cleanup", () => db("bookmarks").truncate());
 
 context("it testes the get/bookmarks with DATA", () => {
   beforeEach(() => {
@@ -26,6 +27,34 @@ context("it testes the get/bookmarks with DATA", () => {
   });
 
   it("publishes all bookmarks on table", () => {
-    return supertest(app).get("/bookmarks").expect(200, data);
+    return supertest(app).get("/bookmarks").expect(200);
   });
 });
+
+context("it testes the get/bookmarks:id endpoint witht data", () => {
+  beforeEach("load the data to the DB", () => {
+    return db.into("bookmarks").insert(data);
+  });
+
+  it("publishes the correct item from id", () => {
+    const secondID = "cjozyzcil0000lxygs3gyg2mr";
+    const secontTestArticle = data[0];
+    return supertest(app)
+      .get(`/bookmarks/${secondID}`)
+      .expect(200, {
+        id: "cjozyzcil0000lxygs3gyg2mr",
+        title: "Thinkful",
+        url: "https://www.thinkful.com",
+        description: "Think outside the classroom",
+        rating: 5,
+      });
+  });
+});
+
+/*
+- 1 happy path per endpoint
+- does it exist
+- is it the right data type
+- is it the right value
+
+*/
