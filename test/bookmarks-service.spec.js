@@ -65,7 +65,7 @@ describe(`POST /articles`, () => {
       });
 
       it("responds with 204 and removes the article", () => {
-        const idToRemove = "1";
+        const idToRemove = "2";
         const expectedBookmarks = data.filter((bm) => bm.id !== idToRemove);
         return supertest(app)
           .delete(`/bookmarks/${idToRemove}`)
