@@ -18,14 +18,14 @@ function makeBookmarksArray() {
       id: "3",
       title: "MDN",
       url: "https://developer.mozilla.org",
-      rating: 5,
+      rating: "5",
       description: "The only place to find web documentation",
     },
     {
       id: "4",
       title: "Redfin",
       url: "https://www.redfin.com/",
-      rating: 4,
+      rating: "4",
       description: "Real estate brokerage",
     },
     {

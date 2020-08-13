@@ -1,21 +1,34 @@
 const express = require("express");
 const { v4: uuid } = require("uuid");
 const logger = require("./logger");
-const bookmarks = require("./store");
+
 const bookmarksRouter = express.Router();
 const bodyParser = express.json();
 const BookmarksService = require("./bookmarks-service");
+const xss = require("xss");
+
+const serializeBookmark = (bookmark) => ({
+  id: bookmark.id,
+  title: xss(bookmark.title),
+  url: bookmark.url,
+  description: xss(bookmark.description),
+  rating: Number(bookmark.rating),
+});
 
 bookmarksRouter
   .route("/bookmarks")
-  .get((req, res) => {
+  .get((req, res, next) => {
     const knexInstance = req.app.get("db");
 
-    BookmarksService.getAllArticles(knexInstance);
-    res.json(bookmarks).catch(() => {});
+    BookmarksService.getAllArticles(knexInstance)
+      .then((bookmark) => {
+        res.status(200).json(bookmark);
+      })
+      .catch(next);
   })
 
-  .post(bodyParser, (req, res) => {
+  .post(bodyParser, (req, res, next) => {
+    const knexInstance = req.app.get("db");
     const { title, url, description, rating } = req.body;
     if (!title) {
       logger.error(`Title is required`);
@@ -32,9 +45,16 @@ bookmarksRouter
       return res.status(400).send("Invalid data");
     }
 
+    if (rating < 0 || rating > 5) {
+      logger.error("rating must be between 1 to 5");
+      return res
+        .status(400)
+        .send("Invalid Data, rating should be between 1 and 5");
+    }
+
     const id = uuid();
 
-    const bookmark = {
+    const newBookmark = {
       id,
       title,
       url,
@@ -42,47 +62,48 @@ bookmarksRouter
       rating,
     };
 
-    bookmarks.push(bookmark);
-    logger.info(`Bookmark with id ${id} created`);
-
-    res
-      .status(201)
-      .location(`http://localhost:8000/bookmark/${id}`)
-      .json(bookmark);
+    BookmarksService.insertArticle(knexInstance, newBookmark)
+      .then((bookmark) => {
+        res.status(201).json({
+          id: bookmark.id,
+          title: xss(bookmark.title),
+          url: xss(bookmark.url),
+          description: xss(bookmark.description),
+          rating: bookmark.rating,
+        });
+      })
+      .catch(next);
   });
 
 bookmarksRouter
-  .route("/bookmarks/:id")
-  .get((req, res) => {
-    const { id } = req.params;
-    const bookmark = bookmarks.find((c) => c.id == id);
 
-    // make sure we found a card
-    if (!bookmark) {
-      logger.error(`Bookmark with id ${id} not found.`);
-      return res.status(404).send("Bookmark Not Found");
-    }
-
-    res.json(bookmark);
-  }) // move implementation logic into here
-
-  .delete((req, res) => {
-    const { id } = req.params;
-    const markIndex = bookmarks.findIndex((c) => c.id == id);
-
-    if (markIndex === -1) {
-      logger.error(`Bookmark with id ${id} not found.`);
-      return res.status(404).send("Bookmark Not Found");
-    }
-
-    //remove card from lists
-    //assume cardIds are not duplicated in the cardIds array
-
-    bookmarks.splice(markIndex, 1);
-
-    logger.info(`Bookmark with id ${id} deleted.`);
-
-    res.status(204).end();
-  }); // move implementation logic into here
-
+  .route("/bookmarks/:bookmark_id")
+  .all((req, res, next) => {
+    const { bookmark_id } = req.params;
+    BookmarksService.getById(req.app.get("db"), bookmark_id)
+      .then((bookmark) => {
+        if (!bookmark) {
+          return res.status(404).json({
+            error: { message: `bookmark doesn't exist` },
+          });
+        }
+        res.bookmark = bookmark; // save the article for the next middleware
+        next(); // don't forget to call next so the next middleware happens!
+      })
+      .catch(next);
+  })
+  .get((req, res, next) => {
+    res.json(serializeBookmark(res.bookmark));
+  })
+  .delete((req, res, next) => {
+    // TODO: update to use db
+    const knexInstance = req.app.get("db");
+    const { bookmark_id } = req.params;
+    BookmarksService.deleteArticle(knexInstance, bookmark_id)
+      .then((numRowsAffected) => {
+        logger.info(`Card with id ${bookmark_id} deleted.`);
+        res.status(204).end();
+      })
+      .catch(next);
+  });
 module.exports = bookmarksRouter;

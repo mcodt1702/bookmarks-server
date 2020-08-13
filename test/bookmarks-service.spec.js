@@ -37,17 +37,44 @@ context("it testes the get/bookmarks:id endpoint witht data", () => {
   });
 
   it("publishes the correct item from id", () => {
-    const secondID = "cjozyzcil0000lxygs3gyg2mr";
-    const secontTestArticle = data[0];
+    const secondID = "2";
+    const secontTestArticle = data[secondID - 1];
     return supertest(app)
       .get(`/bookmarks/${secondID}`)
-      .expect(200, {
-        id: "cjozyzcil0000lxygs3gyg2mr",
-        title: "Thinkful",
-        url: "https://www.thinkful.com",
-        description: "Think outside the classroom",
-        rating: 5,
+      .expect(200, secontTestArticle);
+  });
+});
+
+describe(`POST /articles`, () => {
+  it(`creates an article, responding with 201 and the new article`, function () {
+    return supertest(app)
+      .post("/bookmarks")
+      .send({
+        title: "Test new article",
+        url: "www.newurl.com",
+        description: "Listicle",
+        rating: 1,
+      })
+      .expect(201);
+  });
+
+  describe(`DELETE /bookmarks/:id`, () => {
+    context("Given there are bookmarks in the database", () => {
+      beforeEach("insert bookmarks", () => {
+        return db.into("bookmarks").insert(data);
       });
+
+      it("responds with 204 and removes the article", () => {
+        const idToRemove = "1";
+        const expectedBookmarks = data.filter((bm) => bm.id !== idToRemove);
+        return supertest(app)
+          .delete(`/bookmarks/${idToRemove}`)
+          .expect(204)
+          .then((res) =>
+            supertest(app).get(`/bookmarks`).expect(expectedBookmarks)
+          );
+      });
+    });
   });
 });
 

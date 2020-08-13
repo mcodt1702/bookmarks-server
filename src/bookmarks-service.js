@@ -1,13 +1,11 @@
-const knex = require("knex");
-
 const BookmarksService = {
   getAllArticles(knex) {
     return knex.select("*").from("bookmarks");
   },
 
-  insertArticle(knex, newArticle) {
+  insertArticle(knex, newBookmark) {
     return knex
-      .insert(newArticle)
+      .insert(newBookmark)
       .into("bookmarks")
       .returning("*")
       .then((rows) => {
@@ -23,8 +21,8 @@ const BookmarksService = {
     return knex("bookmarks").where({ id }).delete();
   },
 
-  updateArticle(knex, id, newArticleFields) {
-    return knex("bookmarks").where({ id }).update(newArticleFields);
+  updateArticle(knex, id, newBookmarkFields) {
+    return knex("bookmarks").where({ id }).update(newBookmarkFields);
   },
 };
 
