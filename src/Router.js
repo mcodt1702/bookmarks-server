@@ -99,6 +99,17 @@ bookmarksRouter
     const { title, url, rating, description } = req.body;
     const newBookmarkFields = { title, url, rating, description };
 
+    const numberOfValues = Object.values(newBookmarkFields).filter(Boolean)
+      .length;
+    if (numberOfValues === 0) {
+      logger.error(`Invalid update without required fields`);
+      return res.status(400).json({
+        error: {
+          message: `Request body must content either 'title', 'url', 'description' or 'rating'`,
+        },
+      });
+    }
+
     BookmarksService.updateBookmark(
       req.app.get("db"),
       req.params.bookmark_id,

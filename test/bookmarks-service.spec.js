@@ -93,6 +93,19 @@ describe(`POST /bookmarks`, () => {
         return db.into("bookmarks").insert(data);
       });
 
+      it(`responds with 400 when no required fields supplied`, () => {
+        const idToUpdate = 2;
+        return supertest(app)
+          .patch(`/api/bookmarks/${idToUpdate}`)
+
+          .send({ irrelevantField: "foo" })
+          .expect(400, {
+            error: {
+              message: `Request body must content either 'title', 'url', 'description' or 'rating'`,
+            },
+          });
+      });
+
       it("respons with a 204 and updates the bookmark given an id", () => {
         const idToUpdate = 3;
         const updateArticle = {

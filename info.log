@@ -136,3 +136,5 @@
 {"message":"Card with id 2 deleted.","level":"info"}
 {"message":"Card with id 2 deleted.","level":"info"}
 {"message":"Card with id 2 deleted.","level":"info"}
+{"message":"Card with id 2 deleted.","level":"info"}
+{"message":"Invalid update without required fields","level":"error"}
