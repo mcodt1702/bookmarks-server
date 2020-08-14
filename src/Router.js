@@ -16,7 +16,7 @@ const serializeBookmark = (bookmark) => ({
 });
 
 bookmarksRouter
-  .route("/bookmarks")
+  .route("/api/bookmarks")
   .get((req, res, next) => {
     const knexInstance = req.app.get("db");
 
@@ -77,14 +77,14 @@ bookmarksRouter
 
 bookmarksRouter
 
-  .route("/bookmarks/:bookmark_id")
+  .route("/api/bookmarks/:bookmark_id")
   .all((req, res, next) => {
     const { bookmark_id } = req.params;
     BookmarksService.getById(req.app.get("db"), bookmark_id)
       .then((bookmark) => {
         if (!bookmark) {
           return res.status(404).json({
-            error: { message: `bookmark doesn't exist` },
+            error: { message: `Bookmark doesn't exist` },
           });
         }
         res.bookmark = bookmark; // save the article for the next middleware
@@ -95,6 +95,21 @@ bookmarksRouter
   .get((req, res, next) => {
     res.json(serializeBookmark(res.bookmark));
   })
+  .patch(bodyParser, (req, res, next) => {
+    const { title, url, rating, description } = req.body;
+    const newBookmarkFields = { title, url, rating, description };
+
+    BookmarksService.updateBookmark(
+      req.app.get("db"),
+      req.params.bookmark_id,
+      newBookmarkFields
+    )
+      .then((numRowsAffected) => {
+        res.status(204).end();
+      })
+      .catch(next);
+  })
+
   .delete((req, res, next) => {
     // TODO: update to use db
     const knexInstance = req.app.get("db");
@@ -106,4 +121,5 @@ bookmarksRouter
       })
       .catch(next);
   });
+
 module.exports = bookmarksRouter;

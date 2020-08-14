@@ -21,36 +21,36 @@ before("clean the table", () => db("bookmarks").truncate());
 after("disconnect from db", () => db.destroy());
 afterEach("cleanup", () => db("bookmarks").truncate());
 
-context("it testes the get/bookmarks with DATA", () => {
+context("it testes the get/api/bookmarks with DATA", () => {
   beforeEach(() => {
     return db.into("bookmarks").insert(data);
   });
 
   it("publishes all bookmarks on table", () => {
-    return supertest(app).get("/bookmarks").expect(200);
+    return supertest(app).get("/api/bookmarks").expect(200);
   });
 });
 
-context("it testes the get/bookmarks:id endpoint witht data", () => {
+context("it testes the get/api/bookmarks:id endpoint witht data", () => {
   beforeEach("load the data to the DB", () => {
     return db.into("bookmarks").insert(data);
   });
 
   it("publishes the correct item from id", () => {
     const secondID = "2";
-    const secontTestArticle = data[secondID - 1];
+    const secontTestbookmark = data[secondID - 1];
     return supertest(app)
-      .get(`/bookmarks/${secondID}`)
-      .expect(200, secontTestArticle);
+      .get(`/api/bookmarks/${secondID}`)
+      .expect(200, secontTestbookmark);
   });
 });
 
-describe(`POST /articles`, () => {
-  it(`creates an article, responding with 201 and the new article`, function () {
+describe(`POST /bookmarks`, () => {
+  it(`creates an bookmark, responding with 201 and the new bookmark`, function () {
     return supertest(app)
-      .post("/bookmarks")
+      .post("/api/bookmarks")
       .send({
-        title: "Test new article",
+        title: "Test new bookmark",
         url: "www.newurl.com",
         description: "Listicle",
         rating: 1,
@@ -58,20 +58,60 @@ describe(`POST /articles`, () => {
       .expect(201);
   });
 
-  describe(`DELETE /bookmarks/:id`, () => {
+  describe(`DELETE /api/bookmarks/:id`, () => {
     context("Given there are bookmarks in the database", () => {
       beforeEach("insert bookmarks", () => {
         return db.into("bookmarks").insert(data);
       });
 
-      it("responds with 204 and removes the article", () => {
+      it("responds with 204 and removes the bookmark", () => {
         const idToRemove = "2";
         const expectedBookmarks = data.filter((bm) => bm.id !== idToRemove);
         return supertest(app)
-          .delete(`/bookmarks/${idToRemove}`)
+          .delete(`/api/bookmarks/${idToRemove}`)
           .expect(204)
           .then((res) =>
-            supertest(app).get(`/bookmarks`).expect(expectedBookmarks)
+            supertest(app).get(`/api/bookmarks`).expect(expectedBookmarks)
+          );
+      });
+    });
+  });
+
+  describe("patch/api/bookarks", () => {
+    context("with no bookmarks in the database", () => {
+      it(`responds with 404`, () => {
+        const articleId = 123456;
+        return supertest(app)
+          .patch(`/api/bookmarks/${articleId}`)
+          .expect(404, { error: { message: `Bookmark doesn't exist` } });
+      });
+    });
+    context("given there is data in the database", () => {
+      const testBookmarks = makeBookmarksArray();
+
+      beforeEach("insert bookmarks", () => {
+        return db.into("bookmarks").insert(data);
+      });
+
+      it("respons with a 204 and updates the bookmark given an id", () => {
+        const idToUpdate = 3;
+        const updateArticle = {
+          title: "updated bookmark",
+          url: "www.newurl.com",
+          description: "updated bookmark shines ",
+          rating: 1,
+        };
+
+        const expectedBookmark = {
+          ...data[idToUpdate - 1],
+          ...updateArticle,
+        };
+        return supertest(app)
+          .patch(`/api/bookmarks/${idToUpdate}`)
+          .send(updateArticle)
+          .expect(204)
+          .then((res) =>
+            supertest(app).get(`/api/bookmarks/3`).expect(expectedBookmark)
           );
       });
     });
